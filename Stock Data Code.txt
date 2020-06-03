@@ -1,0 +1,107 @@
+Sub StockData()
+
+'Declare worksheet variable
+Dim ws As Worksheet
+       
+'Loop through all sheets
+    For Each ws In ThisWorkbook.Sheets
+     
+'Create variables
+Dim Ticker As String
+Dim yearly_change, opening_price, closing_price As Double
+Dim percent_change As Double
+Dim total_volume As Double
+Dim Ticker_Total As Double
+Dim last_row As Double
+
+'Set initial variables for holding Totals
+    Ticker_Total = 0
+    price_difference_Total = 0
+    percent_change_Total = 0
+    total_volume = 0
+
+'Keep track of the location for each ticker in the summary table
+Dim Summary_Table_Row As Integer
+Summary_Table_Row = 2
+
+'Find last row
+last_row = ws.Cells(Rows.Count, 1).End(xlUp).Row
+
+'Create summary headings
+ws.Range("I1").Value = "Ticker"
+ws.Range("J1").Value = "Yearly Change"
+ws.Range("K1").Value = "Percent Change"
+ws.Range("L1").Value = "Total Stock Volume"
+ws.Range("O1").Value = "Ticker"
+ws.Range("P1").Value = "Total Volume"
+
+'Create Row labels
+ws.Range("N2").Value = "Greatest % Increase"
+ws.Range("N3").Value = "Greatest % Decrease"
+ws.Range("N4").Value = "Greatest Total Volume"
+
+
+'Loop through all ticker symbols
+For i = 2 To last_row
+
+'Check if we are still within the same ticker, if it is not...
+If ws.Cells(i - 1, 1).Value <> ws.Cells(i, 1).Value Then
+
+'If so, get the open price
+    opening_price = ws.Cells(i, 3).Value
+
+' Check if we are still within the same Ticker Symbol range, if it is not...
+ElseIf ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+    
+    'Set ticker name
+    Ticker = ws.Cells(i, 1).Value
+    'Get closing_price
+        closing_price = ws.Cells(i, 6).Value
+    'Add to total volume
+    total_volume = total_volume + ws.Cells(i, 7).Value
+    
+ If opening_price = 0 Then
+    opening_price = ws.Cells(i + 1, 3).Value
+
+End If
+   
+   yearly_change = closing_price - opening_price
+    percent_change = 100 * (yearly_change / opening_price)
+               
+
+   ' Print out our values
+    ws.Range("I" & Summary_Table_Row).Value = Ticker
+    ws.Range("J" & Summary_Table_Row).Value = yearly_change
+    ws.Range("K" & Summary_Table_Row).Value = Format(percent_change, "0.00%")
+    ws.Range("L" & Summary_Table_Row).Value = total_volume
+    
+' Conditional formatting
+If yearly_change < 0 Then
+    ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 3
+ElseIf yearly_change = 0 Then
+    ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 0
+Else
+    ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 4
+End If
+
+'Add one to the row for Summary Table Row
+Summary_Table_Row = Summary_Table_Row + 1
+
+'Reset the stock volume
+    total_volume = 0
+    Else
+     
+     ' What happens if the ticker symbol is the same
+     ' Add to the total of the stock volume
+     total_volume = total_volume + ws.Cells(i, 7).Value
+  End If
+      
+    Next i
+
+    
+Next ws
+
+End Sub
+
+
+
